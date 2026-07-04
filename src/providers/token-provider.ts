@@ -821,6 +821,49 @@ export const USDC_SONEIUM = new Token(
   'Soneium Bridged USDC Soneium'
 );
 
+// HookSwap chain stablecoins (verified on-chain 2026-07-04 via symbol()/decimals()/name()).
+// ChainId.HYPEREVM/ROBINHOOD/MEGAETH/INK require the @uniswap/sdk-core
+// dependency override to HooksOS/sdks (see hookswap-notes.md).
+export const USDT0_HYPEREVM = new Token(
+  ChainId.HYPEREVM,
+  '0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb',
+  6,
+  'USD₮0',
+  'USD₮0'
+);
+
+export const USDG_ROBINHOOD = new Token(
+  ChainId.ROBINHOOD,
+  '0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168',
+  6,
+  'USDG',
+  'Global Dollar'
+);
+
+export const USDM_MEGAETH = new Token(
+  ChainId.MEGAETH,
+  '0xFAfDdbb3FC7688494971a79cc65DCa3EF82079E7',
+  18,
+  'USDm',
+  'MegaUSD'
+);
+
+export const USDE_MEGAETH = new Token(
+  ChainId.MEGAETH,
+  '0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34',
+  18,
+  'USDe',
+  'USDe'
+);
+
+export const USDT0_INK = new Token(
+  ChainId.INK,
+  '0x0200C29006150606B650577BBE7B6248F58470c1',
+  6,
+  'USD₮0',
+  'USD₮0'
+);
+
 export class TokenProvider implements ITokenProvider {
   constructor(
     private chainId: ChainId,

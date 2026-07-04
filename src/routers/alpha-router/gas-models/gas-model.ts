@@ -58,6 +58,11 @@ import {
   USDC_XLAYER,
   USDC_ZKSYNC,
   USDC_ZORA,
+  USDE_MEGAETH,
+  USDG_ROBINHOOD,
+  USDM_MEGAETH,
+  USDT0_HYPEREVM,
+  USDT0_INK,
   USDT_ARBITRUM,
   USDT_BNB,
   USDT_GOERLI,
@@ -139,6 +144,11 @@ export const usdGasTokensByChain: { [chainId in ChainId]?: Token[] } = {
   [ChainId.UNICHAIN]: [DAI_UNICHAIN, USDC_UNICHAIN],
   [ChainId.SONEIUM]: [USDC_SONEIUM],
   [ChainId.XLAYER]: [USDC_XLAYER],
+  // HookSwap chains (verified on-chain stables; 18-decimal tokens first per note above)
+  [ChainId.HYPEREVM]: [USDT0_HYPEREVM],
+  [ChainId.ROBINHOOD]: [USDG_ROBINHOOD],
+  [ChainId.MEGAETH]: [USDM_MEGAETH, USDE_MEGAETH],
+  [ChainId.INK]: [USDT0_INK],
 };
 
 export type L1ToL2GasCosts = {
