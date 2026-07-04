@@ -34,10 +34,12 @@ export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.BASE_SEPOLIA,
   ChainId.SONEIUM,
   ChainId.XLAYER,
-  // HookSwap chains (v2+v3 only). ChainId.HYPEREVM/ROBINHOOD require the
-  // @uniswap/sdk-core dependency override to HooksOS/sdks (see hookswap-notes.md).
+  // HookSwap chains (v2+v3 only). ChainId.HYPEREVM/ROBINHOOD/MEGAETH/INK require
+  // the @uniswap/sdk-core dependency override to HooksOS/sdks (see hookswap-notes.md).
   ChainId.HYPEREVM,
   ChainId.ROBINHOOD,
+  ChainId.MEGAETH,
+  ChainId.INK,
   // Gnosis and Moonbeam don't yet have contracts deployed yet
 ];
 
@@ -59,6 +61,8 @@ export const V2_SUPPORTED = [
   // HookSwap chains
   ChainId.HYPEREVM,
   ChainId.ROBINHOOD,
+  ChainId.MEGAETH,
+  ChainId.INK,
 ];
 
 export const V4_SUPPORTED = [
@@ -194,8 +198,12 @@ export const ID_TO_CHAIN_ID = (id: number): ChainId => {
       return ChainId.XLAYER;
     case 999:
       return ChainId.HYPEREVM;
+    case 4326:
+      return ChainId.MEGAETH;
     case 4663:
       return ChainId.ROBINHOOD;
+    case 57073:
+      return ChainId.INK;
     default:
       throw new Error(`Unknown chain id: ${id}`);
   }
@@ -234,6 +242,8 @@ export enum ChainName {
   XLAYER = 'xlayer-mainnet',
   HYPEREVM = 'hyperevm-mainnet',
   ROBINHOOD = 'robinhood-mainnet',
+  MEGAETH = 'megaeth-mainnet',
+  INK = 'ink-mainnet',
 }
 
 export enum NativeCurrencyName {
@@ -381,6 +391,16 @@ export const NATIVE_NAMES_BY_ID: { [chainId: number]: string[] } = {
     'ETHER',
     '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
   ],
+  [ChainId.MEGAETH]: [
+    'ETH',
+    'ETHER',
+    '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+  ],
+  [ChainId.INK]: [
+    'ETH',
+    'ETHER',
+    '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+  ],
 };
 
 export const NATIVE_CURRENCY: { [chainId: number]: NativeCurrencyName } = {
@@ -415,6 +435,8 @@ export const NATIVE_CURRENCY: { [chainId: number]: NativeCurrencyName } = {
   [ChainId.XLAYER]: NativeCurrencyName.XLAYER,
   [ChainId.HYPEREVM]: NativeCurrencyName.HYPE,
   [ChainId.ROBINHOOD]: NativeCurrencyName.ETHER,
+  [ChainId.MEGAETH]: NativeCurrencyName.ETHER,
+  [ChainId.INK]: NativeCurrencyName.ETHER,
 };
 
 export const ID_TO_NETWORK_NAME = (id: number): ChainName => {
@@ -481,8 +503,12 @@ export const ID_TO_NETWORK_NAME = (id: number): ChainName => {
       return ChainName.XLAYER;
     case 999:
       return ChainName.HYPEREVM;
+    case 4326:
+      return ChainName.MEGAETH;
     case 4663:
       return ChainName.ROBINHOOD;
+    case 57073:
+      return ChainName.INK;
     default:
       throw new Error(`Unknown chain id: ${id}`);
   }
@@ -556,6 +582,15 @@ export const ID_TO_PROVIDER = (id: ChainId): string => {
       return (
         process.env.JSON_RPC_PROVIDER_ROBINHOOD ??
         'https://rpc.mainnet.chain.robinhood.com'
+      );
+    case ChainId.MEGAETH:
+      return (
+        process.env.JSON_RPC_PROVIDER_MEGAETH ??
+        'https://mainnet.megaeth.com/rpc'
+      );
+    case ChainId.INK:
+      return (
+        process.env.JSON_RPC_PROVIDER_INK ?? 'https://rpc-gel.inkonchain.com'
       );
     default:
       throw new Error(`Chain id: ${id} not supported`);
@@ -800,6 +835,20 @@ export const WRAPPED_NATIVE_CURRENCY: { [chainId in ChainId]: Token } = {
   [ChainId.ROBINHOOD]: new Token(
     ChainId.ROBINHOOD,
     '0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73',
+    18,
+    'WETH',
+    'Wrapped Ether'
+  ),
+  [ChainId.MEGAETH]: new Token(
+    ChainId.MEGAETH,
+    '0x4200000000000000000000000000000000000006',
+    18,
+    'WETH',
+    'Wrapped Ether'
+  ),
+  [ChainId.INK]: new Token(
+    ChainId.INK,
+    '0x4200000000000000000000000000000000000006',
     18,
     'WETH',
     'Wrapped Ether'

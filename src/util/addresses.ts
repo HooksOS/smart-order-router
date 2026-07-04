@@ -11,6 +11,34 @@ import { FACTORY_ADDRESS } from '@uniswap/v3-sdk';
 
 import { NETWORKS_WITH_SAME_UNISWAP_ADDRESSES } from './chains';
 
+// HookSwap self-deployed contracts (source of truth:
+// HookSwap/contracts/deployments/{megaeth,robinhood,ink}.json).
+// Deterministic deployer => identical addresses on MegaETH (4326),
+// Robinhood (4663) and Ink (57073).
+// ChainId.MEGAETH/ROBINHOOD/INK require the @uniswap/sdk-core dependency
+// override to HooksOS/sdks. HYPEREVM is intentionally NOT listed here —
+// contracts are not deployed on HyperEVM yet.
+export const HOOKSWAP_V3_CORE_FACTORY_ADDRESS =
+  '0xAa1f5Bd529Be345e7FB77934554112E5ecd7D7f3';
+export const HOOKSWAP_QUOTER_V2_ADDRESS =
+  '0x15cD41B273865feD20BC8B5cDF4423D7678ac78E';
+export const HOOKSWAP_MULTICALL_ADDRESS =
+  '0xfEb3eA6212761c1891389e77ee5Bf27c3b385E1A';
+export const HOOKSWAP_SWAP_ROUTER_02_ADDRESS =
+  '0xE8526A0429aeC9a5253ac854F8b6dC964E677EE4';
+export const HOOKSWAP_TICK_LENS_ADDRESS =
+  '0xf248c369C125094cDB95E8AbeE095c11758C8F14';
+export const HOOKSWAP_NONFUNGIBLE_POSITION_MANAGER_ADDRESS =
+  '0xbd817036c5bF69Cb27D3A342129e39f9f908577d';
+export const HOOKSWAP_V3_MIGRATOR_ADDRESS =
+  '0x45DB3eaE624dBcA631A9C6C1406DA0B8F6Fb275A';
+export const HOOKSWAP_UNIVERSAL_ROUTER_ADDRESS =
+  '0x3D30133F4d4A80684F02d8310faF572E3dc193b3';
+export const HOOKSWAP_V2_FACTORY_ADDRESS =
+  '0xD1Cf664944173140AFc302c169eFD55c24966B45';
+export const HOOKSWAP_V2_ROUTER_02_ADDRESS =
+  '0xBe3729d06E3A17F3c7c5ac394c7bCbe138B6EEFA';
+
 export const BNB_TICK_LENS_ADDRESS =
   CHAIN_TO_ADDRESSES_MAP[ChainId.BNB].tickLensAddress;
 export const BNB_NONFUNGIBLE_POSITION_MANAGER_ADDRESS =
@@ -59,6 +87,10 @@ export const V3_CORE_FACTORY_ADDRESSES: AddressMap = {
   [ChainId.SONEIUM]:
     CHAIN_TO_ADDRESSES_MAP[ChainId.SONEIUM].v3CoreFactoryAddress,
   [ChainId.XLAYER]: CHAIN_TO_ADDRESSES_MAP[ChainId.XLAYER].v3CoreFactoryAddress,
+  // HookSwap deployments
+  [ChainId.MEGAETH]: HOOKSWAP_V3_CORE_FACTORY_ADDRESS,
+  [ChainId.ROBINHOOD]: HOOKSWAP_V3_CORE_FACTORY_ADDRESS,
+  [ChainId.INK]: HOOKSWAP_V3_CORE_FACTORY_ADDRESS,
 };
 
 export const QUOTER_V2_ADDRESSES: AddressMap = {
@@ -96,6 +128,10 @@ export const QUOTER_V2_ADDRESSES: AddressMap = {
   [ChainId.UNICHAIN]: CHAIN_TO_ADDRESSES_MAP[ChainId.UNICHAIN].quoterAddress,
   [ChainId.SONEIUM]: CHAIN_TO_ADDRESSES_MAP[ChainId.SONEIUM].quoterAddress,
   [ChainId.XLAYER]: CHAIN_TO_ADDRESSES_MAP[ChainId.XLAYER].quoterAddress,
+  // HookSwap deployments
+  [ChainId.MEGAETH]: HOOKSWAP_QUOTER_V2_ADDRESS,
+  [ChainId.ROBINHOOD]: HOOKSWAP_QUOTER_V2_ADDRESS,
+  [ChainId.INK]: HOOKSWAP_QUOTER_V2_ADDRESS,
 };
 
 export const NEW_QUOTER_V2_ADDRESSES: AddressMap = {
@@ -124,6 +160,10 @@ export const NEW_QUOTER_V2_ADDRESSES: AddressMap = {
   [ChainId.UNICHAIN]: CHAIN_TO_ADDRESSES_MAP[ChainId.UNICHAIN].quoterAddress, // TODO: deploy view-only-quoter to unichain
   [ChainId.SONEIUM]: CHAIN_TO_ADDRESSES_MAP[ChainId.SONEIUM].quoterAddress,
   [ChainId.XLAYER]: CHAIN_TO_ADDRESSES_MAP[ChainId.XLAYER].quoterAddress,
+  // HookSwap deployments — standard QuoterV2 (no view-only-quoter deployed)
+  [ChainId.MEGAETH]: HOOKSWAP_QUOTER_V2_ADDRESS,
+  [ChainId.ROBINHOOD]: HOOKSWAP_QUOTER_V2_ADDRESS,
+  [ChainId.INK]: HOOKSWAP_QUOTER_V2_ADDRESS,
 };
 
 export const PROTOCOL_V4_QUOTER_ADDRESSES: AddressMap = {
@@ -224,10 +264,23 @@ export const UNISWAP_MULTICALL_ADDRESSES: AddressMap = {
   [ChainId.UNICHAIN]: CHAIN_TO_ADDRESSES_MAP[ChainId.UNICHAIN].multicallAddress,
   [ChainId.SONEIUM]: CHAIN_TO_ADDRESSES_MAP[ChainId.SONEIUM].multicallAddress,
   [ChainId.XLAYER]: CHAIN_TO_ADDRESSES_MAP[ChainId.XLAYER].multicallAddress,
+  // HookSwap deployments (UniswapInterfaceMulticall via deploy-v3)
+  [ChainId.MEGAETH]: HOOKSWAP_MULTICALL_ADDRESS,
+  [ChainId.ROBINHOOD]: HOOKSWAP_MULTICALL_ADDRESS,
+  [ChainId.INK]: HOOKSWAP_MULTICALL_ADDRESS,
+};
+
+// HookSwap deployments — take precedence over the sdk-core helper so these
+// chains never fall back to the canonical mainnet router address.
+export const HOOKSWAP_SWAP_ROUTER_02_ADDRESSES: AddressMap = {
+  [ChainId.MEGAETH]: HOOKSWAP_SWAP_ROUTER_02_ADDRESS,
+  [ChainId.ROBINHOOD]: HOOKSWAP_SWAP_ROUTER_02_ADDRESS,
+  [ChainId.INK]: HOOKSWAP_SWAP_ROUTER_02_ADDRESS,
 };
 
 export const SWAP_ROUTER_02_ADDRESSES = (chainId: number): string => {
   return (
+    HOOKSWAP_SWAP_ROUTER_02_ADDRESSES[chainId] ??
     SWAP_ROUTER_02_ADDRESSES_HELPER(chainId) ??
     '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45'
   );
@@ -345,6 +398,35 @@ export const WETH9: {
   [ChainId.UNICHAIN]: WETH9_HELPER[ChainId.UNICHAIN]!,
   [ChainId.SONEIUM]: WETH9_HELPER[ChainId.SONEIUM]!,
   [ChainId.XLAYER]: WETH9_HELPER[ChainId.XLAYER]!,
+  // HookSwap chains — canonical wrapped-native reused per chain
+  [ChainId.HYPEREVM]: new Token(
+    ChainId.HYPEREVM,
+    '0x5555555555555555555555555555555555555555',
+    18,
+    'WHYPE',
+    'Wrapped HYPE'
+  ),
+  [ChainId.ROBINHOOD]: new Token(
+    ChainId.ROBINHOOD,
+    '0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73',
+    18,
+    'WETH',
+    'Wrapped Ether'
+  ),
+  [ChainId.MEGAETH]: new Token(
+    ChainId.MEGAETH,
+    '0x4200000000000000000000000000000000000006',
+    18,
+    'WETH',
+    'Wrapped Ether'
+  ),
+  [ChainId.INK]: new Token(
+    ChainId.INK,
+    '0x4200000000000000000000000000000000000006',
+    18,
+    'WETH',
+    'Wrapped Ether'
+  ),
 };
 
 export const BEACON_CHAIN_DEPOSIT_ADDRESS =
