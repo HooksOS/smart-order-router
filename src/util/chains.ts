@@ -796,10 +796,10 @@ export const WRAPPED_NATIVE_CURRENCY: { [chainId in ChainId]: Token } = {
     'WHYPE',
     'Wrapped HYPE'
   ),
-  // TODO(HookSwap): replace with the WETH9 deployed on Robinhood (contracts/deployments/robinhood.json)
+  // Robinhood Chain canonical WETH (official Robinhood Stock Token contract)
   [ChainId.ROBINHOOD]: new Token(
     ChainId.ROBINHOOD,
-    '0x0000000000000000000000000000000000000000',
+    '0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73',
     18,
     'WETH',
     'Wrapped Ether'
