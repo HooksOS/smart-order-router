@@ -34,6 +34,10 @@ export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.BASE_SEPOLIA,
   ChainId.SONEIUM,
   ChainId.XLAYER,
+  // HookSwap chains (v2+v3 only). ChainId.HYPEREVM/ROBINHOOD require the
+  // @uniswap/sdk-core dependency override to HooksOS/sdks (see hookswap-notes.md).
+  ChainId.HYPEREVM,
+  ChainId.ROBINHOOD,
   // Gnosis and Moonbeam don't yet have contracts deployed yet
 ];
 
@@ -52,6 +56,9 @@ export const V2_SUPPORTED = [
   ChainId.UNICHAIN,
   ChainId.SONEIUM,
   ChainId.XLAYER,
+  // HookSwap chains
+  ChainId.HYPEREVM,
+  ChainId.ROBINHOOD,
 ];
 
 export const V4_SUPPORTED = [
@@ -185,6 +192,10 @@ export const ID_TO_CHAIN_ID = (id: number): ChainId => {
       return ChainId.SONEIUM;
     case 196:
       return ChainId.XLAYER;
+    case 999:
+      return ChainId.HYPEREVM;
+    case 4663:
+      return ChainId.ROBINHOOD;
     default:
       throw new Error(`Unknown chain id: ${id}`);
   }
@@ -221,6 +232,8 @@ export enum ChainName {
   SONEIUM = 'soneium-mainnet',
   MONAD = 'monad-mainnet',
   XLAYER = 'xlayer-mainnet',
+  HYPEREVM = 'hyperevm-mainnet',
+  ROBINHOOD = 'robinhood-mainnet',
 }
 
 export enum NativeCurrencyName {
@@ -234,6 +247,7 @@ export enum NativeCurrencyName {
   AVALANCHE = 'AVAX',
   MONAD = 'MON',
   XLAYER = 'OKB',
+  HYPE = 'HYPE',
 }
 
 export const NATIVE_NAMES_BY_ID: { [chainId: number]: string[] } = {
@@ -357,6 +371,16 @@ export const NATIVE_NAMES_BY_ID: { [chainId: number]: string[] } = {
     'OKB',
     '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
   ],
+  [ChainId.HYPEREVM]: [
+    'HYPE',
+    'HYPE',
+    '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+  ],
+  [ChainId.ROBINHOOD]: [
+    'ETH',
+    'ETHER',
+    '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+  ],
 };
 
 export const NATIVE_CURRENCY: { [chainId: number]: NativeCurrencyName } = {
@@ -389,6 +413,8 @@ export const NATIVE_CURRENCY: { [chainId: number]: NativeCurrencyName } = {
   [ChainId.UNICHAIN]: NativeCurrencyName.ETHER,
   [ChainId.SONEIUM]: NativeCurrencyName.ETHER,
   [ChainId.XLAYER]: NativeCurrencyName.XLAYER,
+  [ChainId.HYPEREVM]: NativeCurrencyName.HYPE,
+  [ChainId.ROBINHOOD]: NativeCurrencyName.ETHER,
 };
 
 export const ID_TO_NETWORK_NAME = (id: number): ChainName => {
@@ -453,6 +479,10 @@ export const ID_TO_NETWORK_NAME = (id: number): ChainName => {
       return ChainName.SONEIUM;
     case 196:
       return ChainName.XLAYER;
+    case 999:
+      return ChainName.HYPEREVM;
+    case 4663:
+      return ChainName.ROBINHOOD;
     default:
       throw new Error(`Unknown chain id: ${id}`);
   }
@@ -518,6 +548,15 @@ export const ID_TO_PROVIDER = (id: ChainId): string => {
       return process.env.JSON_RPC_PROVIDER_SONEIUM!;
     case ChainId.XLAYER:
       return process.env.JSON_RPC_PROVIDER_XLAYER!;
+    case ChainId.HYPEREVM:
+      return (
+        process.env.JSON_RPC_PROVIDER_HYPEREVM ?? 'https://rpc.hyperliquid.xyz/evm'
+      );
+    case ChainId.ROBINHOOD:
+      return (
+        process.env.JSON_RPC_PROVIDER_ROBINHOOD ??
+        'https://rpc.mainnet.chain.robinhood.com'
+      );
     default:
       throw new Error(`Chain id: ${id} not supported`);
   }
@@ -749,6 +788,21 @@ export const WRAPPED_NATIVE_CURRENCY: { [chainId in ChainId]: Token } = {
     18,
     'WOKB',
     'Wrapped OKB'
+  ),
+  [ChainId.HYPEREVM]: new Token(
+    ChainId.HYPEREVM,
+    '0x5555555555555555555555555555555555555555',
+    18,
+    'WHYPE',
+    'Wrapped HYPE'
+  ),
+  // TODO(HookSwap): replace with the WETH9 deployed on Robinhood (contracts/deployments/robinhood.json)
+  [ChainId.ROBINHOOD]: new Token(
+    ChainId.ROBINHOOD,
+    '0x0000000000000000000000000000000000000000',
+    18,
+    'WETH',
+    'Wrapped Ether'
   ),
 };
 
