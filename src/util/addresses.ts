@@ -16,8 +16,11 @@ import { NETWORKS_WITH_SAME_UNISWAP_ADDRESSES } from './chains';
 // Deterministic deployer => identical addresses on MegaETH (4326),
 // Robinhood (4663) and Ink (57073).
 // ChainId.MEGAETH/ROBINHOOD/INK require the @uniswap/sdk-core dependency
-// override to HooksOS/sdks. HYPEREVM is intentionally NOT listed here —
-// contracts are not deployed on HyperEVM yet.
+// override to HooksOS/sdks.
+// XLayer (196), HyperEVM (999) and Tempo (4217) have UNIQUE (non-deterministic)
+// addresses, so they are wired per-chain via CHAIN_TO_ADDRESSES_MAP (updated in the
+// HooksOS/sdks fork) rather than the shared HOOKSWAP_* constants below. HyperEVM is
+// now fully deployed; Tempo is v2-factory-only (v3 deploy BLOCKED — see tempo.json).
 export const HOOKSWAP_V3_CORE_FACTORY_ADDRESS =
   '0xAa1f5Bd529Be345e7FB77934554112E5ecd7D7f3';
 export const HOOKSWAP_QUOTER_V2_ADDRESS =
@@ -87,6 +90,9 @@ export const V3_CORE_FACTORY_ADDRESSES: AddressMap = {
   [ChainId.SONEIUM]:
     CHAIN_TO_ADDRESSES_MAP[ChainId.SONEIUM].v3CoreFactoryAddress,
   [ChainId.XLAYER]: CHAIN_TO_ADDRESSES_MAP[ChainId.XLAYER].v3CoreFactoryAddress,
+  // HookSwap own deployment on HyperEVM (unique addresses, from sdk-core fork)
+  [ChainId.HYPEREVM]:
+    CHAIN_TO_ADDRESSES_MAP[ChainId.HYPEREVM].v3CoreFactoryAddress,
   // HookSwap deployments
   [ChainId.MEGAETH]: HOOKSWAP_V3_CORE_FACTORY_ADDRESS,
   [ChainId.ROBINHOOD]: HOOKSWAP_V3_CORE_FACTORY_ADDRESS,
@@ -128,6 +134,8 @@ export const QUOTER_V2_ADDRESSES: AddressMap = {
   [ChainId.UNICHAIN]: CHAIN_TO_ADDRESSES_MAP[ChainId.UNICHAIN].quoterAddress,
   [ChainId.SONEIUM]: CHAIN_TO_ADDRESSES_MAP[ChainId.SONEIUM].quoterAddress,
   [ChainId.XLAYER]: CHAIN_TO_ADDRESSES_MAP[ChainId.XLAYER].quoterAddress,
+  // HookSwap own deployment on HyperEVM (QuoterV2, from sdk-core fork)
+  [ChainId.HYPEREVM]: CHAIN_TO_ADDRESSES_MAP[ChainId.HYPEREVM].quoterAddress,
   // HookSwap deployments
   [ChainId.MEGAETH]: HOOKSWAP_QUOTER_V2_ADDRESS,
   [ChainId.ROBINHOOD]: HOOKSWAP_QUOTER_V2_ADDRESS,
@@ -160,6 +168,8 @@ export const NEW_QUOTER_V2_ADDRESSES: AddressMap = {
   [ChainId.UNICHAIN]: CHAIN_TO_ADDRESSES_MAP[ChainId.UNICHAIN].quoterAddress, // TODO: deploy view-only-quoter to unichain
   [ChainId.SONEIUM]: CHAIN_TO_ADDRESSES_MAP[ChainId.SONEIUM].quoterAddress,
   [ChainId.XLAYER]: CHAIN_TO_ADDRESSES_MAP[ChainId.XLAYER].quoterAddress,
+  // HookSwap own deployment on HyperEVM — standard QuoterV2 (no view-only-quoter deployed)
+  [ChainId.HYPEREVM]: CHAIN_TO_ADDRESSES_MAP[ChainId.HYPEREVM].quoterAddress,
   // HookSwap deployments — standard QuoterV2 (no view-only-quoter deployed)
   [ChainId.MEGAETH]: HOOKSWAP_QUOTER_V2_ADDRESS,
   [ChainId.ROBINHOOD]: HOOKSWAP_QUOTER_V2_ADDRESS,
@@ -188,7 +198,7 @@ export const PROTOCOL_V4_QUOTER_ADDRESSES: AddressMap = {
   [ChainId.SONEIUM]: CHAIN_TO_ADDRESSES_MAP[ChainId.SONEIUM].v4QuoterAddress,
   [ChainId.MONAD]: CHAIN_TO_ADDRESSES_MAP[ChainId.MONAD].v4QuoterAddress,
   [ChainId.CELO]: CHAIN_TO_ADDRESSES_MAP[ChainId.CELO].v4QuoterAddress,
-  [ChainId.XLAYER]: CHAIN_TO_ADDRESSES_MAP[ChainId.XLAYER].v4QuoterAddress,
+  // XLayer removed: HookSwap's XLayer deployment is v2+v3 only (no v4 quoter).
 };
 
 export const MIXED_ROUTE_QUOTER_V1_ADDRESSES: AddressMap = {
@@ -206,7 +216,7 @@ export const MIXED_ROUTE_QUOTER_V1_ADDRESSES: AddressMap = {
   [ChainId.WORLDCHAIN]: '0x204FAca1764B154221e35c0d20aBb3c525710498',
   [ChainId.ZORA]: '0x204FAca1764B154221e35c0d20aBb3c525710498',
   [ChainId.SONEIUM]: '0x42c14CE921e85bf14467A82fAf8182546cf7c604',
-  [ChainId.XLAYER]: '0x2d01411773c8c24805306e89a41f7855c3c4fe65',
+  // XLayer removed: HookSwap deployed no mixed-route quoter on XLayer.
   [ChainId.MONAD]: '0xdcd9f4e8972f619b325b0c3109412dfc4d184734',
 };
 
@@ -224,7 +234,7 @@ export const MIXED_ROUTE_QUOTER_V2_ADDRESSES: AddressMap = {
   [ChainId.WORLDCHAIN]: '0x9D0F15f2cf58655fDDcD1EE6129C547fDaeD01b1',
   [ChainId.ZORA]: '0x5f739c790a48E97eec0efb81bab5D152c0A0ecA0',
   [ChainId.SONEIUM]: '0x42c14CE921e85bf14467A82fAf8182546cf7c604',
-  [ChainId.XLAYER]: '0x2d01411773c8c24805306e89a41f7855c3c4fe65',
+  // XLayer removed: HookSwap deployed no mixed-route quoter on XLayer.
   [ChainId.MONAD]: '0xdcd9f4e8972f619b325b0c3109412dfc4d184734',
 };
 
@@ -264,6 +274,8 @@ export const UNISWAP_MULTICALL_ADDRESSES: AddressMap = {
   [ChainId.UNICHAIN]: CHAIN_TO_ADDRESSES_MAP[ChainId.UNICHAIN].multicallAddress,
   [ChainId.SONEIUM]: CHAIN_TO_ADDRESSES_MAP[ChainId.SONEIUM].multicallAddress,
   [ChainId.XLAYER]: CHAIN_TO_ADDRESSES_MAP[ChainId.XLAYER].multicallAddress,
+  // HookSwap own deployment on HyperEVM (UniswapInterfaceMulticall via deploy-v3)
+  [ChainId.HYPEREVM]: CHAIN_TO_ADDRESSES_MAP[ChainId.HYPEREVM].multicallAddress,
   // HookSwap deployments (UniswapInterfaceMulticall via deploy-v3)
   [ChainId.MEGAETH]: HOOKSWAP_MULTICALL_ADDRESS,
   [ChainId.ROBINHOOD]: HOOKSWAP_MULTICALL_ADDRESS,
@@ -306,7 +318,7 @@ export const STATE_VIEW_ADDRESSES: AddressMap = {
   [ChainId.SONEIUM]: CHAIN_TO_ADDRESSES_MAP[ChainId.SONEIUM].v4StateView,
   [ChainId.MONAD]: CHAIN_TO_ADDRESSES_MAP[ChainId.MONAD].v4StateView,
   [ChainId.CELO]: CHAIN_TO_ADDRESSES_MAP[ChainId.CELO].v4StateView,
-  [ChainId.XLAYER]: CHAIN_TO_ADDRESSES_MAP[ChainId.XLAYER].v4StateView,
+  // XLayer removed: HookSwap's XLayer deployment is v2+v3 only (no v4 state view).
 };
 
 export const OVM_GASPRICE_ADDRESS =
@@ -423,6 +435,14 @@ export const WETH9: {
   [ChainId.INK]: new Token(
     ChainId.INK,
     '0x4200000000000000000000000000000000000006',
+    18,
+    'WETH',
+    'Wrapped Ether'
+  ),
+  // Tempo: routing wrapper only (WETH9 constructor arg). Native gas = pathUSD.
+  [ChainId.TEMPO]: new Token(
+    ChainId.TEMPO,
+    '0xBbBcC62853a5fA27b93d6Bab3E6F7ce841E25Df2',
     18,
     'WETH',
     'Wrapped Ether'

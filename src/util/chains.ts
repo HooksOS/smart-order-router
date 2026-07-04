@@ -34,12 +34,14 @@ export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.BASE_SEPOLIA,
   ChainId.SONEIUM,
   ChainId.XLAYER,
-  // HookSwap chains (v2+v3 only). ChainId.HYPEREVM/ROBINHOOD/MEGAETH/INK require
+  // HookSwap chains (v2+v3 only). ChainId.HYPEREVM/ROBINHOOD/MEGAETH/INK/TEMPO require
   // the @uniswap/sdk-core dependency override to HooksOS/sdks (see hookswap-notes.md).
   ChainId.HYPEREVM,
   ChainId.ROBINHOOD,
   ChainId.MEGAETH,
   ChainId.INK,
+  // Tempo: v2 factory deployed; v2 router + v3 suite deploy BLOCKED (gas funds) — see addresses.ts TODOs.
+  ChainId.TEMPO,
   // Gnosis and Moonbeam don't yet have contracts deployed yet
 ];
 
@@ -80,7 +82,7 @@ export const V4_SUPPORTED = [
   ChainId.UNICHAIN,
   ChainId.SONEIUM,
   ChainId.CELO,
-  ChainId.XLAYER,
+  // XLayer removed: converted to HookSwap's own v2+v3-only deployment (no v4).
 ];
 
 export const MIXED_SUPPORTED = [
@@ -99,7 +101,7 @@ export const MIXED_SUPPORTED = [
   ChainId.WORLDCHAIN,
   ChainId.ZORA,
   ChainId.SONEIUM,
-  ChainId.XLAYER,
+  // XLayer removed: HookSwap deployed no mixed-route quoter (v2+v3 only).
   ChainId.MONAD,
 ];
 
@@ -204,6 +206,8 @@ export const ID_TO_CHAIN_ID = (id: number): ChainId => {
       return ChainId.ROBINHOOD;
     case 57073:
       return ChainId.INK;
+    case 4217:
+      return ChainId.TEMPO;
     default:
       throw new Error(`Unknown chain id: ${id}`);
   }
@@ -244,6 +248,7 @@ export enum ChainName {
   ROBINHOOD = 'robinhood-mainnet',
   MEGAETH = 'megaeth-mainnet',
   INK = 'ink-mainnet',
+  TEMPO = 'tempo-mainnet',
 }
 
 export enum NativeCurrencyName {
@@ -401,6 +406,12 @@ export const NATIVE_NAMES_BY_ID: { [chainId: number]: string[] } = {
     'ETHER',
     '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
   ],
+  // Tempo gas is paid in pathUSD (ERC-20); ETH label used for routing native machinery.
+  [ChainId.TEMPO]: [
+    'ETH',
+    'ETHER',
+    '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+  ],
 };
 
 export const NATIVE_CURRENCY: { [chainId: number]: NativeCurrencyName } = {
@@ -437,6 +448,8 @@ export const NATIVE_CURRENCY: { [chainId: number]: NativeCurrencyName } = {
   [ChainId.ROBINHOOD]: NativeCurrencyName.ETHER,
   [ChainId.MEGAETH]: NativeCurrencyName.ETHER,
   [ChainId.INK]: NativeCurrencyName.ETHER,
+  // Tempo gas = pathUSD (ERC-20); ETHER placeholder for routing native machinery.
+  [ChainId.TEMPO]: NativeCurrencyName.ETHER,
 };
 
 export const ID_TO_NETWORK_NAME = (id: number): ChainName => {
@@ -509,6 +522,8 @@ export const ID_TO_NETWORK_NAME = (id: number): ChainName => {
       return ChainName.ROBINHOOD;
     case 57073:
       return ChainName.INK;
+    case 4217:
+      return ChainName.TEMPO;
     default:
       throw new Error(`Unknown chain id: ${id}`);
   }
@@ -591,6 +606,10 @@ export const ID_TO_PROVIDER = (id: ChainId): string => {
     case ChainId.INK:
       return (
         process.env.JSON_RPC_PROVIDER_INK ?? 'https://rpc-gel.inkonchain.com'
+      );
+    case ChainId.TEMPO:
+      return (
+        process.env.JSON_RPC_PROVIDER_TEMPO ?? 'https://rpc.tempo.xyz'
       );
     default:
       throw new Error(`Chain id: ${id} not supported`);
@@ -849,6 +868,14 @@ export const WRAPPED_NATIVE_CURRENCY: { [chainId in ChainId]: Token } = {
   [ChainId.INK]: new Token(
     ChainId.INK,
     '0x4200000000000000000000000000000000000006',
+    18,
+    'WETH',
+    'Wrapped Ether'
+  ),
+  // Tempo: routing wrapper only (WETH9 constructor arg). Native gas = pathUSD.
+  [ChainId.TEMPO]: new Token(
+    ChainId.TEMPO,
+    '0xBbBcC62853a5fA27b93d6Bab3E6F7ce841E25Df2',
     18,
     'WETH',
     'Wrapped Ether'
