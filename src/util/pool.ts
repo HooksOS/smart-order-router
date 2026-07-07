@@ -6,7 +6,7 @@ import { nativeOnChain } from './chains';
 
 const FAKE_TICK_SPACING = 0;
 
-export const V4_ETH_WETH_FAKE_POOL: { [chainId in ChainId]: V4Pool } = {
+export const V4_ETH_WETH_FAKE_POOL: { [chainId in ChainId]?: V4Pool } = {
   [ChainId.MAINNET]: new V4Pool(
     nativeOnChain(ChainId.MAINNET),
     nativeOnChain(ChainId.MAINNET).wrapped,

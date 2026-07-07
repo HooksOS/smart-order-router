@@ -124,9 +124,11 @@ export function computeAllMixedRoutes(
         pool instanceof V4Pool &&
         pool.v4InvolvesToken(nativeOnChain(currencyIn.chainId))
     ).length > 0;
+  const ethWethFakePool =
+    V4_ETH_WETH_FAKE_POOL[currencyIn.chainId as ChainId];
   const amendedPools =
-    containsV4NativePools && shouldEnableMixedRouteEthWeth
-      ? parts.concat(V4_ETH_WETH_FAKE_POOL[currencyIn.chainId as ChainId])
+    containsV4NativePools && shouldEnableMixedRouteEthWeth && ethWethFakePool
+      ? parts.concat(ethWethFakePool)
       : parts;
   // NOTE: we added a fake v4 pool, in order for mixed route to connect the v3 weth pool with v4 eth pool
   const routesRaw = computeAllRoutes<TPool, MixedRoute, Currency>(
@@ -190,7 +192,7 @@ export function computeAllRoutes<
         (pool) =>
           pool instanceof V4Pool &&
           pool.tickSpacing ===
-            V4_ETH_WETH_FAKE_POOL[tokenIn.chainId as ChainId].tickSpacing
+            V4_ETH_WETH_FAKE_POOL[tokenIn.chainId as ChainId]?.tickSpacing
       ).length > 0;
     const amendedMaxHops = currentRouteContainsFakeV4Pool
       ? maxHops + 1

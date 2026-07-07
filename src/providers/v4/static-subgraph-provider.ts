@@ -29,7 +29,7 @@ export class StaticV4SubgraphProvider implements IV4SubgraphProvider {
     providerConfig?: ProviderConfig
   ): Promise<V4SubgraphPool[]> {
     log.info('In static subgraph provider for V4');
-    const bases = BASES_TO_CHECK_TRADES_AGAINST[this.chainId];
+    const bases = BASES_TO_CHECK_TRADES_AGAINST[this.chainId] ?? [];
 
     const basePairs: [Currency, Currency][] = _.flatMap(
       bases,

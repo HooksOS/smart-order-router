@@ -40,7 +40,7 @@ export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.ROBINHOOD,
   ChainId.MEGAETH,
   ChainId.INK,
-  // Tempo: v2 factory deployed; v2 router + v3 suite deploy BLOCKED (gas funds) — see addresses.ts TODOs.
+  // Tempo: full v2+v3+UR stack deployed (see contracts/deployments/tempo.json).
   ChainId.TEMPO,
   // Gnosis and Moonbeam don't yet have contracts deployed yet
 ];
@@ -65,6 +65,8 @@ export const V2_SUPPORTED = [
   ChainId.ROBINHOOD,
   ChainId.MEGAETH,
   ChainId.INK,
+  // Tempo: own v2 router02 deployed (contracts/deployments/tempo.json → v2Router02).
+  ChainId.TEMPO,
 ];
 
 export const V4_SUPPORTED = [
@@ -616,7 +618,7 @@ export const ID_TO_PROVIDER = (id: ChainId): string => {
   }
 };
 
-export const WRAPPED_NATIVE_CURRENCY: { [chainId in ChainId]: Token } = {
+export const WRAPPED_NATIVE_CURRENCY = {
   [ChainId.MAINNET]: new Token(
     1,
     '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
@@ -880,7 +882,21 @@ export const WRAPPED_NATIVE_CURRENCY: { [chainId in ChainId]: Token } = {
     'WETH',
     'Wrapped Ether'
   ),
-};
+  // Linea canonical WETH (from vendored @uniswap/sdk-core WETH9[59144]).
+  [ChainId.LINEA]: new Token(
+    ChainId.LINEA,
+    '0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f',
+    18,
+    'WETH',
+    'Wrapped Ether'
+  ),
+  // NOTE: ChainId.ARC (5042) is intentionally absent — Arc has no wrapped
+  // native currency (sdk-core WETH9 has no 5042 entry; interface arc.ts sets
+  // wrappedNativeCurrency: null). Arc is inherited from the vendored sdk-core
+  // enum but is NOT a HookSwap routing target, so it is never read here. The
+  // cast below keeps the map exhaustively typed for the definite reads across
+  // the SOR without inventing a fake Arc address.
+} as { [chainId in ChainId]: Token };
 
 function isMatic(
   chainId: number

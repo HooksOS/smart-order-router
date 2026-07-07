@@ -19,8 +19,8 @@ import { NETWORKS_WITH_SAME_UNISWAP_ADDRESSES } from './chains';
 // override to HooksOS/sdks.
 // XLayer (196), HyperEVM (999) and Tempo (4217) have UNIQUE (non-deterministic)
 // addresses, so they are wired per-chain via CHAIN_TO_ADDRESSES_MAP (updated in the
-// HooksOS/sdks fork) rather than the shared HOOKSWAP_* constants below. HyperEVM is
-// now fully deployed; Tempo is v2-factory-only (v3 deploy BLOCKED — see tempo.json).
+// HooksOS/sdks fork) rather than the shared HOOKSWAP_* constants below. HyperEVM and
+// Tempo are both now fully deployed (v2+v3+UR) — see contracts/deployments/*.json.
 export const HOOKSWAP_V3_CORE_FACTORY_ADDRESS =
   '0xAa1f5Bd529Be345e7FB77934554112E5ecd7D7f3';
 export const HOOKSWAP_QUOTER_V2_ADDRESS =
@@ -93,6 +93,8 @@ export const V3_CORE_FACTORY_ADDRESSES: AddressMap = {
   // HookSwap own deployment on HyperEVM (unique addresses, from sdk-core fork)
   [ChainId.HYPEREVM]:
     CHAIN_TO_ADDRESSES_MAP[ChainId.HYPEREVM].v3CoreFactoryAddress,
+  // HookSwap own deployment on Tempo (unique/non-deterministic addresses, from sdk-core fork)
+  [ChainId.TEMPO]: CHAIN_TO_ADDRESSES_MAP[ChainId.TEMPO].v3CoreFactoryAddress,
   // HookSwap deployments
   [ChainId.MEGAETH]: HOOKSWAP_V3_CORE_FACTORY_ADDRESS,
   [ChainId.ROBINHOOD]: HOOKSWAP_V3_CORE_FACTORY_ADDRESS,
@@ -136,6 +138,8 @@ export const QUOTER_V2_ADDRESSES: AddressMap = {
   [ChainId.XLAYER]: CHAIN_TO_ADDRESSES_MAP[ChainId.XLAYER].quoterAddress,
   // HookSwap own deployment on HyperEVM (QuoterV2, from sdk-core fork)
   [ChainId.HYPEREVM]: CHAIN_TO_ADDRESSES_MAP[ChainId.HYPEREVM].quoterAddress,
+  // HookSwap own deployment on Tempo (QuoterV2, from sdk-core fork)
+  [ChainId.TEMPO]: CHAIN_TO_ADDRESSES_MAP[ChainId.TEMPO].quoterAddress,
   // HookSwap deployments
   [ChainId.MEGAETH]: HOOKSWAP_QUOTER_V2_ADDRESS,
   [ChainId.ROBINHOOD]: HOOKSWAP_QUOTER_V2_ADDRESS,
@@ -170,6 +174,8 @@ export const NEW_QUOTER_V2_ADDRESSES: AddressMap = {
   [ChainId.XLAYER]: CHAIN_TO_ADDRESSES_MAP[ChainId.XLAYER].quoterAddress,
   // HookSwap own deployment on HyperEVM — standard QuoterV2 (no view-only-quoter deployed)
   [ChainId.HYPEREVM]: CHAIN_TO_ADDRESSES_MAP[ChainId.HYPEREVM].quoterAddress,
+  // HookSwap own deployment on Tempo — standard QuoterV2 (no view-only-quoter deployed)
+  [ChainId.TEMPO]: CHAIN_TO_ADDRESSES_MAP[ChainId.TEMPO].quoterAddress,
   // HookSwap deployments — standard QuoterV2 (no view-only-quoter deployed)
   [ChainId.MEGAETH]: HOOKSWAP_QUOTER_V2_ADDRESS,
   [ChainId.ROBINHOOD]: HOOKSWAP_QUOTER_V2_ADDRESS,
@@ -276,6 +282,8 @@ export const UNISWAP_MULTICALL_ADDRESSES: AddressMap = {
   [ChainId.XLAYER]: CHAIN_TO_ADDRESSES_MAP[ChainId.XLAYER].multicallAddress,
   // HookSwap own deployment on HyperEVM (UniswapInterfaceMulticall via deploy-v3)
   [ChainId.HYPEREVM]: CHAIN_TO_ADDRESSES_MAP[ChainId.HYPEREVM].multicallAddress,
+  // HookSwap own deployment on Tempo (UniswapInterfaceMulticall via deploy-v3)
+  [ChainId.TEMPO]: CHAIN_TO_ADDRESSES_MAP[ChainId.TEMPO].multicallAddress,
   // HookSwap deployments (UniswapInterfaceMulticall via deploy-v3)
   [ChainId.MEGAETH]: HOOKSWAP_MULTICALL_ADDRESS,
   [ChainId.ROBINHOOD]: HOOKSWAP_MULTICALL_ADDRESS,
@@ -361,6 +369,10 @@ export const WETH9: {
     | ChainId.AVALANCHE
     | ChainId.MONAD_TESTNET
     | ChainId.MONAD
+    // Arc (5042) has no wrapped native currency (sdk-core WETH9 has no 5042
+    // entry; interface arc.ts wrappedNativeCurrency: null). Not a HookSwap
+    // routing target — excluded rather than given a fake address.
+    | ChainId.ARC
     // TODO: remove ROOTSTOCK once we support both at the routing level
     | ChainId.ROOTSTOCK
   >]: Token;
@@ -443,6 +455,14 @@ export const WETH9: {
   [ChainId.TEMPO]: new Token(
     ChainId.TEMPO,
     '0xBbBcC62853a5fA27b93d6Bab3E6F7ce841E25Df2',
+    18,
+    'WETH',
+    'Wrapped Ether'
+  ),
+  // Linea canonical WETH (from vendored @uniswap/sdk-core WETH9[59144]).
+  [ChainId.LINEA]: new Token(
+    ChainId.LINEA,
+    '0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f',
     18,
     'WETH',
     'Wrapped Ether'

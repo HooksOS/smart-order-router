@@ -1,6 +1,6 @@
 import { ChainId } from '@uniswap/sdk-core';
 
-export const DEFAULT_BLOCKS_TO_LIVE: { [chain in ChainId]: number } = {
+export const DEFAULT_BLOCKS_TO_LIVE: { [chain in ChainId]?: number } = {
   // (60 minutes) / (12 seconds)= 300
   [ChainId.MAINNET]: 300,
   [ChainId.GOERLI]: 300,

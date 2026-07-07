@@ -60,7 +60,7 @@ import {
 import { V3SubgraphPool } from './v3/subgraph-provider';
 
 type ChainTokenList = {
-  readonly [chainId in ChainId]: Currency[];
+  readonly [chainId in ChainId]?: Currency[];
 };
 
 export const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {

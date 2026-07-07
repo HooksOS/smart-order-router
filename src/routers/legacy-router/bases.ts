@@ -40,7 +40,7 @@ import {
 import { WRAPPED_NATIVE_CURRENCY } from '../../util/chains';
 
 type ChainTokenList = {
-  readonly [chainId in ChainId]: Token[];
+  readonly [chainId in ChainId]?: Token[];
 };
 
 export const BASES_TO_CHECK_TRADES_AGAINST = (

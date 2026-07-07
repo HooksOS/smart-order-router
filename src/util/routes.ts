@@ -94,7 +94,7 @@ export const routeToString = (route: SupportedRoutes): string => {
       // where we do not want to return the fake pool in the route string as it is not a real pool
       if (
         pool.tickSpacing ===
-        V4_ETH_WETH_FAKE_POOL[pool.chainId as ChainId].tickSpacing
+        V4_ETH_WETH_FAKE_POOL[pool.chainId as ChainId]?.tickSpacing
       ) {
         return ' --  ';
       }
