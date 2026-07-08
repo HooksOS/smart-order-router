@@ -1,7 +1,8 @@
 import { ChainId, Token } from '@uniswap/sdk-core';
-import { Pair } from '@uniswap/v2-sdk';
+import { computePairAddress, Pair } from '@uniswap/v2-sdk';
 import _ from 'lodash';
 
+import { HOOKSWAP_V2_FACTORY_ADDRESSES } from '../../util/addresses';
 import { WRAPPED_NATIVE_CURRENCY } from '../../util/chains';
 import { log } from '../../util/log';
 import {
@@ -228,7 +229,10 @@ export class StaticV2SubgraphProvider implements IV2SubgraphProvider {
 
     const subgraphPools: V2SubgraphPool[] = _(pairs)
       .map(([tokenA, tokenB]) => {
-        const poolAddress = Pair.getAddress(tokenA, tokenB);
+        const hookswapV2Factory = HOOKSWAP_V2_FACTORY_ADDRESSES[tokenA.chainId];
+        const poolAddress = hookswapV2Factory
+          ? computePairAddress({ factoryAddress: hookswapV2Factory, tokenA, tokenB })
+          : Pair.getAddress(tokenA, tokenB);
 
         if (poolAddressSet.has(poolAddress)) {
           return undefined;

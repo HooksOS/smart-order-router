@@ -42,6 +42,23 @@ export const HOOKSWAP_V2_FACTORY_ADDRESS =
 export const HOOKSWAP_V2_ROUTER_02_ADDRESS =
   '0xBe3729d06E3A17F3c7c5ac394c7bCbe138B6EEFA';
 
+// HookSwap per-chain UniswapV2 factory addresses. The upstream @uniswap/v2-sdk
+// FACTORY_ADDRESS_MAP has NO entry for the HookSwap custom chains, so Pair.getAddress()
+// silently falls back to the mainnet V2 factory and computes the WRONG pair address
+// (=> pools never discovered => NO_ROUTE, even with on-chain liquidity). Compute v2 pair
+// addresses with these factories instead; the init-code hash is canonical, so
+// computePairAddress(factory, tokens) yields the real on-chain pair (verified on XLayer:
+// factory.getPair == computePairAddress). Source: HookSwap/contracts/deployments/*.json.
+// Deterministic 0xD1Cf66.. on MegaETH/Robinhood/Ink/XLayer; unique on HyperEVM/Tempo.
+export const HOOKSWAP_V2_FACTORY_ADDRESSES: { [chainId: number]: string } = {
+  [ChainId.MEGAETH]: HOOKSWAP_V2_FACTORY_ADDRESS,
+  [ChainId.ROBINHOOD]: HOOKSWAP_V2_FACTORY_ADDRESS,
+  [ChainId.INK]: HOOKSWAP_V2_FACTORY_ADDRESS,
+  [ChainId.XLAYER]: HOOKSWAP_V2_FACTORY_ADDRESS,
+  [ChainId.HYPEREVM]: '0xB92598Fa464B96FEC394a17A269Ad18060Ec60B2',
+  [ChainId.TEMPO]: '0xE8526A0429aeC9a5253ac854F8b6dC964E677EE4',
+};
+
 export const BNB_TICK_LENS_ADDRESS =
   CHAIN_TO_ADDRESSES_MAP[ChainId.BNB].tickLensAddress;
 export const BNB_NONFUNGIBLE_POSITION_MANAGER_ADDRESS =

@@ -1,9 +1,10 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { ChainId, Token } from '@uniswap/sdk-core';
-import { Pair } from '@uniswap/v2-sdk';
+import { computePairAddress, Pair } from '@uniswap/v2-sdk';
 import retry, { Options as RetryOptions } from 'async-retry';
 import _ from 'lodash';
 
+import { HOOKSWAP_V2_FACTORY_ADDRESSES } from '../../util/addresses';
 import { IUniswapV2Pair__factory } from '../../types/v2/factories/IUniswapV2Pair__factory';
 import {
   CurrencyAmount,
@@ -276,7 +277,14 @@ export class V2PoolProvider implements IV2PoolProvider {
       return { poolAddress: cachedAddress, token0, token1 };
     }
 
-    const poolAddress = Pair.getAddress(token0, token1);
+    const hookswapV2Factory = HOOKSWAP_V2_FACTORY_ADDRESSES[token0.chainId];
+    const poolAddress = hookswapV2Factory
+      ? computePairAddress({
+          factoryAddress: hookswapV2Factory,
+          tokenA: token0,
+          tokenB: token1,
+        })
+      : Pair.getAddress(token0, token1);
 
     this.POOL_ADDRESS_CACHE[cacheKey] = poolAddress;
 
