@@ -117,14 +117,17 @@ export async function getHighestLiquidityV3USDPool(
   chainId: ChainId,
   poolProvider: IV3PoolProvider,
   providerConfig?: GasModelProviderConfig
-): Promise<Pool> {
+): Promise<Pool | null> {
   const usdTokens = usdGasTokensByChain[chainId];
   const wrappedCurrency = WRAPPED_NATIVE_CURRENCY[chainId]!;
 
   if (!usdTokens) {
-    throw new Error(
-      `Could not find a USD token for computing gas costs on ${chainId}`
+    // Thin-liquidity chains may not have a configured USD gas token. Instead of
+    // throwing (which fails the whole route), return null so gas-in-USD is treated as zero.
+    log.warn(
+      `Could not find a USD token for computing gas costs on ${chainId}; gas cost in USD will be reported as zero.`
     );
+    return null;
   }
 
   const feeAmounts = getApplicableV3FeeAmounts(chainId);
@@ -158,9 +161,11 @@ export async function getHighestLiquidityV3USDPool(
     .value();
 
   if (pools.length == 0) {
-    const message = `Could not find a USD/${wrappedCurrency.symbol} pool for computing gas costs.`;
-    log.error({ pools }, message);
-    throw new Error(message);
+    // Thin-liquidity chains may have swap liquidity but no USD/native pool. Instead of
+    // throwing (which fails the whole route), return null so gas-in-USD is treated as zero.
+    const message = `Could not find a USD/${wrappedCurrency.symbol} pool for computing gas costs; gas cost in USD will be reported as zero.`;
+    log.warn({ pools }, message);
+    return null;
   }
 
   const maxPool = pools.reduce((prev, current) => {
@@ -282,18 +287,20 @@ export async function calculateGasUsed(
     gasCostInWei
   );
 
-  const usdPool: Pool = await getHighestLiquidityV3USDPool(
+  // Thin-liquidity chains may have swap liquidity but no USD/native pool; usdPool can be null.
+  const usdPool: Pool | null = await getHighestLiquidityV3USDPool(
     chainId,
     v3PoolProvider,
     providerConfig
   );
 
   /** ------ MARK: USD logic  -------- */
-  const gasCostUSD = getQuoteThroughNativePool(
-    chainId,
-    costNativeCurrency,
-    usdPool
-  );
+  // Thin-liquidity chains without a USD/native pool report zero USD gas cost (native gas unaffected).
+  const usdGasToken =
+    usdGasTokensByChain[chainId]?.[0] ?? nativeCurrency;
+  const gasCostUSD = usdPool
+    ? getQuoteThroughNativePool(chainId, costNativeCurrency, usdPool)
+    : CurrencyAmount.fromRawAmount(usdGasToken, 0);
 
   /** ------ MARK: Conditional logic run if gasToken is specified  -------- */
   let gasCostInTermsOfGasToken: CurrencyAmount | undefined = undefined;
@@ -547,7 +554,9 @@ export function initSwapRouteFromExisting(
 export const calculateL1GasFeesHelper = async (
   route: RouteWithValidQuote[],
   chainId: ChainId,
-  usdPool: Pair | Pool,
+  // Thin-liquidity chains may lack a USD/native pool; usdPool can be null, in which case
+  // the USD-denominated L1 gas cost is reported as zero rather than throwing.
+  usdPool: Pair | Pool | null,
   quoteToken: Token,
   nativePool: Pair | Pool | null,
   provider: BaseProvider,
@@ -598,11 +607,12 @@ export const calculateL1GasFeesHelper = async (
   );
 
   // convert fee into usd
-  const gasCostL1USD: CurrencyAmount = getQuoteThroughNativePool(
-    chainId,
-    costNativeCurrency,
-    usdPool
-  );
+  // Thin-liquidity chains without a USD/native pool have a null usdPool; report USD gas as zero.
+  const usdGasToken =
+    usdGasTokensByChain[chainId]?.[0] ?? WRAPPED_NATIVE_CURRENCY[chainId];
+  const gasCostL1USD: CurrencyAmount = usdPool
+    ? getQuoteThroughNativePool(chainId, costNativeCurrency, usdPool)
+    : CurrencyAmount.fromRawAmount(usdGasToken, 0);
 
   let gasCostL1QuoteToken = costNativeCurrency;
   // if the inputted token is not in the native currency, quote a native/quote token pool to get the gas cost in terms of the quote token

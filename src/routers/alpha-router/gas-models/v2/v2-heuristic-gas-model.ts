@@ -65,7 +65,8 @@ export class V2HeuristicGasModelFactory extends IV2GasModelFactory {
       ? await l2GasDataProvider.getGasData(providerConfig)
       : undefined;
 
-    const usdPoolPromise: Promise<Pair> = this.getHighestLiquidityUSDPool(
+    // Thin-liquidity chains may have swap liquidity but no USD/WETH pool; usdPool can be null.
+    const usdPoolPromise: Promise<Pair | null> = this.getHighestLiquidityUSDPool(
       chainId,
       poolProvider,
       providerConfig
@@ -98,10 +99,13 @@ export class V2HeuristicGasModelFactory extends IV2GasModelFactory {
       );
     }
 
-    const usdToken =
-      usdPool.token0.address == WRAPPED_NATIVE_CURRENCY[chainId]!.address
+    // When there is no USD/WETH pool (thin-liquidity chains), fall back to a valid USD gas token
+    // (or wrapped native) so a zero USD gas amount can still be denominated.
+    const usdToken = usdPool
+      ? usdPool.token0.address == WRAPPED_NATIVE_CURRENCY[chainId]!.address
         ? usdPool.token1
-        : usdPool.token0;
+        : usdPool.token0
+      : usdGasTokensByChain[chainId]?.[0] ?? WRAPPED_NATIVE_CURRENCY[chainId]!;
 
     const calculateL1GasFees = async (
       route: V2RouteWithValidQuote[]
@@ -136,11 +140,10 @@ export class V2HeuristicGasModelFactory extends IV2GasModelFactory {
         );
 
         /** ------ MARK: USD logic  -------- */
-        const gasCostInTermsOfUSD = getQuoteThroughNativePool(
-          chainId,
-          gasCostInEth,
-          usdPool
-        );
+        // Thin-liquidity chains without a USD/WETH pool report zero USD gas cost (native gas unaffected).
+        const gasCostInTermsOfUSD = usdPool
+          ? getQuoteThroughNativePool(chainId, gasCostInEth, usdPool)
+          : CurrencyAmount.fromRawAmount(usdToken, 0);
 
         /** ------ MARK: Conditional logic run if gasToken is specified  -------- */
         let gasCostInTermsOfGasToken: CurrencyAmount | undefined = undefined;
@@ -258,13 +261,16 @@ export class V2HeuristicGasModelFactory extends IV2GasModelFactory {
     chainId: ChainId,
     poolProvider: IV2PoolProvider,
     providerConfig?: ProviderConfig
-  ): Promise<Pair> {
+  ): Promise<Pair | null> {
     const usdTokens = usdGasTokensByChain[chainId];
 
     if (!usdTokens) {
-      throw new Error(
-        `Could not find a USD token for computing gas costs on ${chainId}`
+      // Thin-liquidity chains may not have a configured USD gas token. Instead of throwing
+      // (which fails the whole route), return null so gas-in-USD is treated as zero.
+      log.warn(
+        `Could not find a USD token for computing gas costs on ${chainId}; gas cost in USD will be reported as zero.`
       );
+      return null;
     }
 
     const usdPools = _.map<Token, [Token, Token]>(usdTokens, (usdToken) => [
@@ -284,11 +290,13 @@ export class V2HeuristicGasModelFactory extends IV2GasModelFactory {
     );
 
     if (pools.length == 0) {
-      log.error(
+      // Thin-liquidity chains may have swap liquidity but no USD/WETH pool. Instead of throwing
+      // (which fails the whole route), return null so gas-in-USD is treated as zero.
+      log.warn(
         { pools },
-        `Could not find a USD/WETH pool for computing gas costs.`
+        `Could not find a USD/WETH pool for computing gas costs; gas cost in USD will be reported as zero.`
       );
-      throw new Error(`Can't find USD/WETH pool for computing gas costs.`);
+      return null;
     }
 
     const maxPool = _.maxBy(pools, (pool) => {

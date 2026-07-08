@@ -3268,6 +3268,7 @@ export class AlphaRouter
     ]);
 
     const pools: LiquidityCalculationPools = {
+      // Thin-liquidity chains may have swap liquidity but no USD/native pool; usdPool can be null.
       usdPool: usdPool,
       nativeAndQuoteTokenV3Pool: nativeAndQuoteTokenV3Pool,
       nativeAndAmountTokenV3Pool: nativeAndAmountTokenV3Pool,

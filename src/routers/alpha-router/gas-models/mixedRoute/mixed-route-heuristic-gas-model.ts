@@ -23,6 +23,7 @@ import {
   getQuoteThroughNativePool,
   IGasModel,
   IOnChainGasModelFactory,
+  usdGasTokensByChain,
 } from '../gas-model';
 import {
   BASE_SWAP_COST as BASE_SWAP_COST_V2,
@@ -59,10 +60,15 @@ export class MixedRouteHeuristicGasModelFactory extends IOnChainGasModelFactory<
     IGasModel<MixedRouteWithValidQuote>
   > {
     const nativeCurrency = WRAPPED_NATIVE_CURRENCY[chainId]!;
-    const usdPool: V3Pool = pools.usdPool;
-    const usdToken = usdPool.token0.equals(nativeCurrency)
-      ? usdPool.token1
-      : usdPool.token0;
+    // Thin-liquidity chains may have swap liquidity but no USD/native pool; usdPool can be null.
+    const usdPool: V3Pool | null = pools.usdPool;
+    // When there is no USD/native pool, fall back to a valid USD gas token (or wrapped native)
+    // so a zero USD gas amount can still be denominated.
+    const usdToken = usdPool
+      ? usdPool.token0.equals(nativeCurrency)
+        ? usdPool.token1
+        : usdPool.token0
+      : usdGasTokensByChain[chainId]?.[0] ?? nativeCurrency;
 
     let nativeV2Pool: Pair | null;
     // Avoid fetching for a (WETH,WETH) pool here, we handle the quoteToken = wrapped native case in estimateGasCost
@@ -91,11 +97,10 @@ export class MixedRouteHeuristicGasModelFactory extends IOnChainGasModelFactory<
       );
 
       /** ------ MARK: USD Logic -------- */
-      const gasCostInTermsOfUSD = getQuoteThroughNativePool(
-        chainId,
-        totalGasCostNativeCurrency,
-        usdPool
-      );
+      // Thin-liquidity chains without a USD/native pool report zero USD gas cost (native gas unaffected).
+      const gasCostInTermsOfUSD = usdPool
+        ? getQuoteThroughNativePool(chainId, totalGasCostNativeCurrency, usdPool)
+        : CurrencyAmount.fromRawAmount(usdToken, 0);
 
       /** ------ MARK: Conditional logic run if gasToken is specified  -------- */
       const nativeAndSpecifiedGasTokenPool: V3Pool | null =

@@ -188,7 +188,9 @@ export type BuildV2GasModelFactoryType = {
 };
 
 export type LiquidityCalculationPools = {
-  usdPool: Pool;
+  // Thin-liquidity chains may have swap liquidity but no USD/native pool, in which case
+  // usdPool is null and gas-in-USD is reported as zero (native-denominated gas is unaffected).
+  usdPool: Pool | null;
   nativeAndQuoteTokenV3Pool: Pool | null;
   nativeAndAmountTokenV3Pool: Pool | null;
   nativeAndSpecifiedGasTokenV3Pool: Pool | null;

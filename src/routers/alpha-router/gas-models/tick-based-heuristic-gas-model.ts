@@ -21,6 +21,7 @@ import {
   getQuoteThroughNativePool,
   IGasModel,
   IOnChainGasModelFactory,
+  usdGasTokensByChain,
 } from './gas-model';
 
 export abstract class TickBasedHeuristicGasModelFactory<
@@ -48,7 +49,8 @@ export abstract class TickBasedHeuristicGasModelFactory<
       ? await l2GasDataProvider.getGasData(providerConfig)
       : undefined;
 
-    const usdPool: Pool = pools.usdPool;
+    // Thin-liquidity chains may have swap liquidity but no USD/native pool; usdPool can be null.
+    const usdPool: Pool | null = pools.usdPool;
 
     const calculateL1GasFees = async (
       route: TRouteWithValidQuote[]
@@ -76,9 +78,13 @@ export abstract class TickBasedHeuristicGasModelFactory<
       nativeAmountPool = pools.nativeAndAmountTokenV3Pool;
     }
 
-    const usdToken = usdPool.token0.equals(nativeCurrency)
-      ? usdPool.token1
-      : usdPool.token0;
+    // When there is no USD/native pool (thin-liquidity chains), fall back to a valid USD gas
+    // token (or wrapped native) so a zero USD gas amount can still be denominated.
+    const usdToken = usdPool
+      ? usdPool.token0.equals(nativeCurrency)
+        ? usdPool.token1
+        : usdPool.token0
+      : usdGasTokensByChain[chainId]?.[0] ?? nativeCurrency;
 
     const estimateGasCost = (
       routeWithValidQuote: TRouteWithValidQuote
@@ -99,11 +105,10 @@ export abstract class TickBasedHeuristicGasModelFactory<
       // We only need to go through V2 and V3 USD pools for now,
       // because v4 pools don't have deep liquidity yet.
       // If one day, we see v3 usd pools have much deeper liquidity than v2/v3 usd pools, then we will add v4 pools for gas cost
-      const gasCostInTermsOfUSD = getQuoteThroughNativePool(
-        chainId,
-        totalGasCostNativeCurrency,
-        usdPool
-      );
+      // Thin-liquidity chains without a USD/native pool report zero USD gas cost (native gas unaffected).
+      const gasCostInTermsOfUSD = usdPool
+        ? getQuoteThroughNativePool(chainId, totalGasCostNativeCurrency, usdPool)
+        : CurrencyAmount.fromRawAmount(usdToken, 0);
 
       /** ------ MARK: Conditional logic run if gasToken is specified  -------- */
       const nativeAndSpecifiedGasTokenPool: Pool | null =
