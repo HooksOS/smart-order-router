@@ -59,6 +59,23 @@ export const HOOKSWAP_V2_FACTORY_ADDRESSES: { [chainId: number]: string } = {
   [ChainId.TEMPO]: '0xE8526A0429aeC9a5253ac854F8b6dC964E677EE4',
 };
 
+// HookSwap per-chain Universal Router addresses. The upstream @uniswap/universal-router-sdk
+// has NO entry for most HookSwap custom chains (UNIVERSAL_ROUTER_ADDRESS() throws "Universal
+// Router not deployed on chain <id>"), and for XLayer (196) it silently returns a DIFFERENT,
+// WRONG address (the official upstream Uniswap deployment on that chain, not HookSwap's own)
+// — so swap calldata would target the wrong router. Resolve HookSwap's real deployed UR here
+// instead, checked in methodParameters.ts before falling back to the SDK. Source: HookSwap/
+// contracts/deployments/*.json. Deterministic 0x3D3013.. on MegaETH/Robinhood/Ink; unique on
+// XLayer/HyperEVM/Tempo.
+export const HOOKSWAP_UNIVERSAL_ROUTER_ADDRESSES: { [chainId: number]: string } = {
+  [ChainId.MEGAETH]: HOOKSWAP_UNIVERSAL_ROUTER_ADDRESS,
+  [ChainId.ROBINHOOD]: HOOKSWAP_UNIVERSAL_ROUTER_ADDRESS,
+  [ChainId.INK]: HOOKSWAP_UNIVERSAL_ROUTER_ADDRESS,
+  [ChainId.XLAYER]: '0x6d8a0783213B3b06648DB3708a89732af3661005',
+  [ChainId.HYPEREVM]: '0xD9d4795F2A12305a12C36455ADAD011F2D6143AB',
+  [ChainId.TEMPO]: '0x62aE013cb2b232C20094B466C94bb39714eF661E',
+};
+
 export const BNB_TICK_LENS_ADDRESS =
   CHAIN_TO_ADDRESSES_MAP[ChainId.BNB].tickLensAddress;
 export const BNB_NONFUNGIBLE_POSITION_MANAGER_ADDRESS =

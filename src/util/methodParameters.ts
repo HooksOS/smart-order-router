@@ -14,6 +14,7 @@ import { Route as V3RouteRaw } from '@uniswap/v3-sdk';
 import { Route as V4RouteRaw } from '@uniswap/v4-sdk';
 import _ from 'lodash';
 
+import { HOOKSWAP_UNIVERSAL_ROUTER_ADDRESSES } from './addresses';
 import {
   CurrencyAmount,
   MethodParameters,
@@ -317,9 +318,13 @@ export function buildSwapMethodParameters(
   chainId: ChainId
 ): MethodParameters {
   if (swapConfig.type == SwapType.UNIVERSAL_ROUTER) {
+    // HookSwap custom chains: the upstream SDK either throws ("Universal Router not
+    // deployed on chain <id>") or — worse, e.g. XLayer — silently returns a DIFFERENT
+    // router's address. Use HookSwap's real deployed UR when this chain has one.
+    const hookswapUniversalRouter = HOOKSWAP_UNIVERSAL_ROUTER_ADDRESSES[chainId];
     return {
       ...UniversalRouter.swapCallParameters(trade, swapConfig),
-      to: UNIVERSAL_ROUTER_ADDRESS(swapConfig.version, chainId),
+      to: hookswapUniversalRouter ?? UNIVERSAL_ROUTER_ADDRESS(swapConfig.version, chainId),
     };
   } else if (swapConfig.type == SwapType.SWAP_ROUTER_02) {
     const { recipient, slippageTolerance, deadline, inputTokenPermit } =
