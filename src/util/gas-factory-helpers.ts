@@ -118,14 +118,20 @@ export async function getHighestLiquidityV3USDPool(
   poolProvider: IV3PoolProvider,
   providerConfig?: GasModelProviderConfig
 ): Promise<Pool | null> {
-  const usdTokens = usdGasTokensByChain[chainId];
   const wrappedCurrency = WRAPPED_NATIVE_CURRENCY[chainId]!;
+  // Exclude any USD gas token that IS the wrapped-native itself (e.g. Stable/988 WgUSDT is BOTH
+  // the wrapped-native AND the USD peg). A wrappedNative/usdToken pool where both are the same
+  // token makes Token.sortsBefore throw `Invariant: ADDRESSES`, which kills the whole route
+  // before the null-guard below is reached. Zero-fill gas-in-USD instead.
+  const usdTokens = usdGasTokensByChain[chainId]?.filter(
+    (t) => !t.equals(wrappedCurrency)
+  );
 
-  if (!usdTokens) {
-    // Thin-liquidity chains may not have a configured USD gas token. Instead of
+  if (!usdTokens || usdTokens.length === 0) {
+    // Thin-liquidity chains may not have a (distinct) USD gas token. Instead of
     // throwing (which fails the whole route), return null so gas-in-USD is treated as zero.
     log.warn(
-      `Could not find a USD token for computing gas costs on ${chainId}; gas cost in USD will be reported as zero.`
+      `Could not find a distinct USD token for computing gas costs on ${chainId}; gas cost in USD will be reported as zero.`
     );
     return null;
   }

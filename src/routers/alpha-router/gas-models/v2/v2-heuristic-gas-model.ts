@@ -262,13 +262,18 @@ export class V2HeuristicGasModelFactory extends IV2GasModelFactory {
     poolProvider: IV2PoolProvider,
     providerConfig?: ProviderConfig
   ): Promise<Pair | null> {
-    const usdTokens = usdGasTokensByChain[chainId];
+    // Exclude any USD gas token that IS the wrapped-native itself (e.g. Stable/988 WgUSDT is
+    // BOTH the wrapped-native AND the USD peg). A usdToken/wrappedNative pool where both are the
+    // same token makes Token.sortsBefore throw `Invariant: ADDRESSES`, killing the whole route.
+    const usdTokens = usdGasTokensByChain[chainId]?.filter(
+      (t) => !t.equals(WRAPPED_NATIVE_CURRENCY[chainId]!)
+    );
 
-    if (!usdTokens) {
-      // Thin-liquidity chains may not have a configured USD gas token. Instead of throwing
+    if (!usdTokens || usdTokens.length === 0) {
+      // Thin-liquidity chains may not have a (distinct) USD gas token. Instead of throwing
       // (which fails the whole route), return null so gas-in-USD is treated as zero.
       log.warn(
-        `Could not find a USD token for computing gas costs on ${chainId}; gas cost in USD will be reported as zero.`
+        `Could not find a distinct USD token for computing gas costs on ${chainId}; gas cost in USD will be reported as zero.`
       );
       return null;
     }
