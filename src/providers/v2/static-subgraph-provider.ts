@@ -178,6 +178,8 @@ const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
     USDE_MEGAETH,
   ],
   [ChainId.INK]: [WRAPPED_NATIVE_CURRENCY[ChainId.INK]!, USDT0_INK],
+  // Stable (988): WgUSDT is the USD-pegged wrapped-native (serves as both base tokens).
+  [ChainId.STABLE]: [WRAPPED_NATIVE_CURRENCY[ChainId.STABLE]!],
 };
 
 /**

@@ -149,6 +149,8 @@ export const usdGasTokensByChain: { [chainId in ChainId]?: Token[] } = {
   [ChainId.ROBINHOOD]: [USDG_ROBINHOOD],
   [ChainId.MEGAETH]: [USDM_MEGAETH, USDE_MEGAETH],
   [ChainId.INK]: [USDT0_INK],
+  // Stable (988): WgUSDT is the USD-pegged wrapped-native, so it doubles as the USD gas token.
+  [ChainId.STABLE]: [WRAPPED_NATIVE_CURRENCY[ChainId.STABLE]!],
 };
 
 export type L1ToL2GasCosts = {

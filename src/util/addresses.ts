@@ -57,6 +57,8 @@ export const HOOKSWAP_V2_FACTORY_ADDRESSES: { [chainId: number]: string } = {
   [ChainId.XLAYER]: HOOKSWAP_V2_FACTORY_ADDRESS,
   [ChainId.HYPEREVM]: '0xB92598Fa464B96FEC394a17A269Ad18060Ec60B2',
   [ChainId.TEMPO]: '0xE8526A0429aeC9a5253ac854F8b6dC964E677EE4',
+  // Stable (988) unique v2 factory (contracts/deployments/stable.json).
+  [ChainId.STABLE]: '0xBe3729d06E3A17F3c7c5ac394c7bCbe138B6EEFA',
 };
 
 // HookSwap per-chain Universal Router addresses. The upstream @uniswap/universal-router-sdk
@@ -74,6 +76,8 @@ export const HOOKSWAP_UNIVERSAL_ROUTER_ADDRESSES: { [chainId: number]: string } 
   [ChainId.XLAYER]: '0x6d8a0783213B3b06648DB3708a89732af3661005',
   [ChainId.HYPEREVM]: '0xD9d4795F2A12305a12C36455ADAD011F2D6143AB',
   [ChainId.TEMPO]: '0x62aE013cb2b232C20094B466C94bb39714eF661E',
+  // Stable (988) unique Universal Router (contracts/deployments/stable.json → universalRouter).
+  [ChainId.STABLE]: '0x79F291b64e46a5D2adbe150D58516cd19f49A323',
 };
 
 export const BNB_TICK_LENS_ADDRESS =
@@ -129,6 +133,8 @@ export const V3_CORE_FACTORY_ADDRESSES: AddressMap = {
     CHAIN_TO_ADDRESSES_MAP[ChainId.HYPEREVM].v3CoreFactoryAddress,
   // HookSwap own deployment on Tempo (unique/non-deterministic addresses, from sdk-core fork)
   [ChainId.TEMPO]: CHAIN_TO_ADDRESSES_MAP[ChainId.TEMPO].v3CoreFactoryAddress,
+  // HookSwap own deployment on Stable (unique addresses on the WgUSDT stack, from sdk-core fork)
+  [ChainId.STABLE]: CHAIN_TO_ADDRESSES_MAP[ChainId.STABLE].v3CoreFactoryAddress,
   // HookSwap deployments
   [ChainId.MEGAETH]: HOOKSWAP_V3_CORE_FACTORY_ADDRESS,
   [ChainId.ROBINHOOD]: HOOKSWAP_V3_CORE_FACTORY_ADDRESS,
@@ -174,6 +180,8 @@ export const QUOTER_V2_ADDRESSES: AddressMap = {
   [ChainId.HYPEREVM]: CHAIN_TO_ADDRESSES_MAP[ChainId.HYPEREVM].quoterAddress,
   // HookSwap own deployment on Tempo (QuoterV2, from sdk-core fork)
   [ChainId.TEMPO]: CHAIN_TO_ADDRESSES_MAP[ChainId.TEMPO].quoterAddress,
+  // HookSwap own deployment on Stable (QuoterV2, from sdk-core fork)
+  [ChainId.STABLE]: CHAIN_TO_ADDRESSES_MAP[ChainId.STABLE].quoterAddress,
   // HookSwap deployments
   [ChainId.MEGAETH]: HOOKSWAP_QUOTER_V2_ADDRESS,
   [ChainId.ROBINHOOD]: HOOKSWAP_QUOTER_V2_ADDRESS,
@@ -210,6 +218,8 @@ export const NEW_QUOTER_V2_ADDRESSES: AddressMap = {
   [ChainId.HYPEREVM]: CHAIN_TO_ADDRESSES_MAP[ChainId.HYPEREVM].quoterAddress,
   // HookSwap own deployment on Tempo — standard QuoterV2 (no view-only-quoter deployed)
   [ChainId.TEMPO]: CHAIN_TO_ADDRESSES_MAP[ChainId.TEMPO].quoterAddress,
+  // HookSwap own deployment on Stable — standard QuoterV2 (no view-only-quoter deployed)
+  [ChainId.STABLE]: CHAIN_TO_ADDRESSES_MAP[ChainId.STABLE].quoterAddress,
   // HookSwap deployments — standard QuoterV2 (no view-only-quoter deployed)
   [ChainId.MEGAETH]: HOOKSWAP_QUOTER_V2_ADDRESS,
   [ChainId.ROBINHOOD]: HOOKSWAP_QUOTER_V2_ADDRESS,
@@ -318,6 +328,8 @@ export const UNISWAP_MULTICALL_ADDRESSES: AddressMap = {
   [ChainId.HYPEREVM]: CHAIN_TO_ADDRESSES_MAP[ChainId.HYPEREVM].multicallAddress,
   // HookSwap own deployment on Tempo (UniswapInterfaceMulticall via deploy-v3)
   [ChainId.TEMPO]: CHAIN_TO_ADDRESSES_MAP[ChainId.TEMPO].multicallAddress,
+  // HookSwap own deployment on Stable (UniswapInterfaceMulticall via deploy-v3)
+  [ChainId.STABLE]: CHAIN_TO_ADDRESSES_MAP[ChainId.STABLE].multicallAddress,
   // HookSwap deployments (UniswapInterfaceMulticall via deploy-v3)
   [ChainId.MEGAETH]: HOOKSWAP_MULTICALL_ADDRESS,
   [ChainId.ROBINHOOD]: HOOKSWAP_MULTICALL_ADDRESS,
@@ -492,6 +504,14 @@ export const WETH9: {
     18,
     'WETH',
     'Wrapped Ether'
+  ),
+  // Stable (988): canonical wrapped-native WgUSDT (WETH9 constructor arg). Native gas = USDT0.
+  [ChainId.STABLE]: new Token(
+    ChainId.STABLE,
+    '0x817997ca8394e26cce3de3a076a4889b27dbf9de',
+    18,
+    'WgUSDT',
+    'Wrapped gUSDT'
   ),
   // Linea canonical WETH (from vendored @uniswap/sdk-core WETH9[59144]).
   [ChainId.LINEA]: new Token(

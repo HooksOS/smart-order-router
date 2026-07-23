@@ -42,6 +42,9 @@ export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.INK,
   // Tempo: full v2+v3+UR stack deployed (see contracts/deployments/tempo.json).
   ChainId.TEMPO,
+  // Stable (988): HookSwap own v2+v3 stack on the WgUSDT wrapped-native
+  // (contracts/deployments/stable.json). v2+v3 only, no v4.
+  ChainId.STABLE,
   // Gnosis and Moonbeam don't yet have contracts deployed yet
 ];
 
@@ -67,6 +70,8 @@ export const V2_SUPPORTED = [
   ChainId.INK,
   // Tempo: own v2 router02 deployed (contracts/deployments/tempo.json → v2Router02).
   ChainId.TEMPO,
+  // Stable: own v2 router02 deployed (contracts/deployments/stable.json → v2Router02).
+  ChainId.STABLE,
 ];
 
 export const V4_SUPPORTED = [
@@ -210,6 +215,8 @@ export const ID_TO_CHAIN_ID = (id: number): ChainId => {
       return ChainId.INK;
     case 4217:
       return ChainId.TEMPO;
+    case 988:
+      return ChainId.STABLE;
     default:
       throw new Error(`Unknown chain id: ${id}`);
   }
@@ -251,6 +258,7 @@ export enum ChainName {
   MEGAETH = 'megaeth-mainnet',
   INK = 'ink-mainnet',
   TEMPO = 'tempo-mainnet',
+  STABLE = 'stable-mainnet',
 }
 
 export enum NativeCurrencyName {
@@ -265,6 +273,7 @@ export enum NativeCurrencyName {
   MONAD = 'MON',
   XLAYER = 'OKB',
   HYPE = 'HYPE',
+  USDT0 = 'USDT0',
 }
 
 export const NATIVE_NAMES_BY_ID: { [chainId: number]: string[] } = {
@@ -414,6 +423,12 @@ export const NATIVE_NAMES_BY_ID: { [chainId: number]: string[] } = {
     'ETHER',
     '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
   ],
+  // Stable (988) native gas token is USDT0 (18-decimal native balance), not ETH.
+  [ChainId.STABLE]: [
+    'USDT0',
+    'USDT0',
+    '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+  ],
 };
 
 export const NATIVE_CURRENCY: { [chainId: number]: NativeCurrencyName } = {
@@ -452,6 +467,8 @@ export const NATIVE_CURRENCY: { [chainId: number]: NativeCurrencyName } = {
   [ChainId.INK]: NativeCurrencyName.ETHER,
   // Tempo gas = pathUSD (ERC-20); ETHER placeholder for routing native machinery.
   [ChainId.TEMPO]: NativeCurrencyName.ETHER,
+  // Stable gas = USDT0 (18-decimal native balance), not ETH.
+  [ChainId.STABLE]: NativeCurrencyName.USDT0,
 };
 
 export const ID_TO_NETWORK_NAME = (id: number): ChainName => {
@@ -526,6 +543,8 @@ export const ID_TO_NETWORK_NAME = (id: number): ChainName => {
       return ChainName.INK;
     case 4217:
       return ChainName.TEMPO;
+    case 988:
+      return ChainName.STABLE;
     default:
       throw new Error(`Unknown chain id: ${id}`);
   }
@@ -612,6 +631,11 @@ export const ID_TO_PROVIDER = (id: ChainId): string => {
     case ChainId.TEMPO:
       return (
         process.env.JSON_RPC_PROVIDER_TEMPO ?? 'https://rpc.tempo.xyz'
+      );
+    case ChainId.STABLE:
+      return (
+        process.env.JSON_RPC_PROVIDER_STABLE ??
+        'https://stable-mainnet.rpc.sentio.xyz'
       );
     default:
       throw new Error(`Chain id: ${id} not supported`);
@@ -881,6 +905,15 @@ export const WRAPPED_NATIVE_CURRENCY = {
     18,
     'WETH',
     'Wrapped Ether'
+  ),
+  // Stable (988): canonical wrapped-native WgUSDT (WETH9-style deposit()/withdraw()),
+  // the WETH9 constructor arg for the v3 periphery + routers. Native gas = USDT0.
+  [ChainId.STABLE]: new Token(
+    ChainId.STABLE,
+    '0x817997ca8394e26cce3de3a076a4889b27dbf9de',
+    18,
+    'WgUSDT',
+    'Wrapped gUSDT'
   ),
   // Linea canonical WETH (from vendored @uniswap/sdk-core WETH9[59144]).
   [ChainId.LINEA]: new Token(
